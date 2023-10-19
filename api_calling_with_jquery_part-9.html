@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API_Calling_With_Jquery</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <!-- JQuery CDN -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+    <div class="container pb-5">
+      <form id="myaddform">
+        <h1 class="text-center">Add FORM</h1>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Title</label>
+          <input
+            name="title"
+            type="text"
+            class="form-control"
+            id="exampleInputEmail1"
+            aria-describedby="emailHelp"
+          />
+          <div id="emailHelp" class="form-text"></div>
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Due Date</label>
+          <input
+            name="duedate"
+            type="date"
+            class="form-control"
+            id="exampleInputPassword1"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label"
+            >IS Completed ?</label
+          >
+          <select
+            name="is_completed"
+            class="form-select"
+            aria-label="Default select example"
+          >
+            <option selected>Open this select menu</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <hr />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <!-- Spinner section start -->
+      <div class="d-flex justify-content-center invisible a_loader">
+        <div class="spinner-grow text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <!-- Spinnner section end -->
+      <button class="btn btn-success" data-myattr="getdata">Get Data</button>
+      <!-- Table section start -->
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <!-- Table section end -->
+    </div>
+
+    <script>
+      //Var has a global scope
+      var myurlobject = {
+        url: "https://fakerestapi.azurewebsites.net", //baseAddress = baseurl
+        type: "GET",
+      };
+      document
+        .querySelector('button[data-myattr="getdata"]')
+        .addEventListener("click", function () {
+          //alert('ok');
+          //swal("Hello world!");
+          //swal("Good job!", "You clicked the button!", "success");
+
+          $.ajax({
+            ...myurlobject,
+            url: myurlobject.url + "/api/v1/Activities",
+            beforeSend: function () {
+              document.querySelector(".a_loader").classList.remove("invisible");
+            },
+            success: function (result, status, xhr) {
+              document.querySelector(".a_loader").classList.add("visible");
+              console.log(result);
+              var tr = ``;
+              result.forEach((element) => {
+                console.log(element);
+                tr +=
+                  ` <tr>
+                                          <td>` +
+                  element.id +
+                  `</td>
+                                          <td>` +
+                  element.title +
+                  `</td>
+                                          <td>` +
+                  element.completed +
+                  `</td>
+                                          <td>` +
+                  element.dueDate +
+                  `</td>
+                                          <td>
+                                              <button class="btn btn-sm btn-success">View</button>
+                                              <button class="btn btn-sm btn-info">EDIT</button>
+                                              <button class="btn btn-sm btn-danger">Delete</button>
+                                          </td>
+                                      </tr>`;
+              });
+              console.log(tr);
+              document.querySelector("table > tbody").innerHTML = tr;
+            },
+            error: function () {},
+            complete: function () {},
+          });
+        });
+      document.getElementById("myaddform").onsubmit = function (e) {
+        e.preventDefault(); // To prevent form refreshing the page
+
+        let title = e.target.querySelector('input[name="title"]').value;
+        let duedate = e.target.querySelector('input[name="duedate"]').value;
+        let is_completed = Boolean(
+          e.target.querySelector('input[name="is_completed"]').value
+        );
+        console.log(title);
+        console.log(duedate);
+        console.log(is_completed);
+
+        let mydata = {
+          id: 0,
+          title: title,
+          dueDate: duedate,
+          completed: is_completed,
+        };
+        $.ajax({
+          ...myurlobject,
+          url: myurlobject.url + "/api/v1/Activies",
+          type: "POST", //Previous value of overwrite
+          data: JSON.stringify(mydata),
+          dataType: json,
+          contentType: "application/json",
+          success: function (result, status, xhr) {
+            swal("Good job!", "Activity saved successfully", "success");
+          },
+        });
+      };
+    </script>
+  </body>
+</html>
